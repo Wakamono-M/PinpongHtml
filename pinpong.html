@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ping Pong Game</title>
+  <style>
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="pingPongCanvas" width="800" height="400"></canvas>
+
+<script>
+  // Получаем элемент canvas и его контекст
+  var canvas = document.getElementById("pingPongCanvas");
+  var ctx = canvas.getContext("2d");
+
+  // Начальные координаты мяча
+  var x = canvas.width / 2;
+  var y = canvas.height / 2;
+
+  // Изменение координат мяча
+  var dx = 2;
+  var dy = -2;
+
+  // Радиус мяча
+  var ballRadius = 10;
+
+  // Начальные координаты ракетки
+  var paddleHeight = 10;
+  var paddleWidth = 75;
+  var paddleX = (canvas.width - paddleWidth) / 2;
+
+  // Переменные для управления ракеткой
+  var rightPressed = false;
+  var leftPressed = false;
+
+  // Обработчики событий для нажатия и отпускания клавиш
+  document.addEventListener("keydown", keyDownHandler, false);
+  document.addEventListener("keyup", keyUpHandler, false);
+
+  // Обработчик события для движения мыши
+  document.addEventListener("mousemove", mouseMoveHandler, false);
+
+  function keyDownHandler(e) {
+    if (e.key == "Right" || e.key == "ArrowRight") {
+      rightPressed = true;
+    } else if (e.key == "Left" || e.key == "ArrowLeft") {
+      leftPressed = true;
+    }
+  }
+
+  function keyUpHandler(e) {
+    if (e.key == "Right" || e.key == "ArrowRight") {
+      rightPressed = false;
+    } else if (e.key == "Left" || e.key == "ArrowLeft") {
+      leftPressed = false;
+    }
+  }
+
+  function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < canvas.width) {
+      paddleX = relativeX - paddleWidth / 2;
+    }
+  }
+
+  function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function draw() {
+    // Очищаем холст
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Рисуем мяч и ракетку
+    drawBall();
+    drawPaddle();
+
+    // Обновляем координаты мяча
+    x += dx;
+    y += dy;
+
+    // Отскок мяча от стен
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+      dx = -dx;
+    }
+
+    // Отскок мяча от верхней стены
+    if (y + dy < ballRadius) {
+      dy = -dy;
+    } else if (y + dy > canvas.height - ballRadius) {
+      // Проверка столкновения с ракеткой
+      if (x > paddleX && x < paddleX + paddleWidth) {
+        dy = -dy;
+      } else {
+        // Игрок проиграл, перезапускаем игру
+        document.location.reload();
+      }
+    }
+
+    // Управление ракеткой
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
+      paddleX += 7;
+    } else if (leftPressed && paddleX > 0) {
+      paddleX -= 7;
+    }
+
+    // Анимация
+    requestAnimationFrame(draw);
+  }
+
+  // Запуск анимации
+  draw();
+</script>
+
+</body>
+</html>
